@@ -44,13 +44,17 @@ public class PlayerController : MonoBehaviour
             Vector3 playerToMouse = groundHit.point - transform.position;
             playerToMouse.y = 0;
             Quaternion newRotation  = Quaternion.LookRotation(playerToMouse);
-            playerRb.MoveRotation(newRotation);
+
+            if (!shooter.isKnifeAttack)
+            {
+                playerRb.MoveRotation(newRotation);
+            }     
         }
     }
 
     private void Move(float h,float v)
     {
-        if (!shooter.isShoot)
+        if (!shooter.isShoot && !shooter.isKnifeAttack)
         {
             movement.Set(h, 0f, v);
          
