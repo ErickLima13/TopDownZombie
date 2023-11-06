@@ -23,6 +23,10 @@ public class PlayerHp : MonoBehaviour
         currentHp -= dmg;
 
         float perc = currentHp / (float)maxHp;
+        if(perc < 0)
+        {
+            perc = 0;
+        }
 
         uiManager.UpdateHpBarPlayer(perc);
 

@@ -27,6 +27,11 @@ public class EnemyHp : MonoBehaviour
 
         float perc = currentHp / (float)maxHp;
 
+        if (perc < 0)
+        {
+            perc = 0;
+        }
+
         uiManager.UpdateHpBar(perc,picture);
 
         if (currentHp <= 0)

@@ -60,6 +60,7 @@ public class EnemyMovement : MonoBehaviour
     public void TriggerDead()
     {
         isDead = true;
+        nav.speed = 0f;
         animator.SetTrigger("dead");
     }
 

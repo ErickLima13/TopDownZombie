@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerShooter : MonoBehaviour
 {
@@ -28,6 +30,14 @@ public class PlayerShooter : MonoBehaviour
     public Transform hitBoxKnifePos;
     public GameObject hitBoxKnifePrefab;
 
+    public Sprite[] iconWeapon;
+    public Image pictureWeapon;
+
+    public TextMeshProUGUI totalMunitions;
+    public TextMeshProUGUI currentBullets;
+
+    public int[,] munitions = new int[3, 3];
+
     private void Start()
     {
         playerController = GetComponent<PlayerController>();
@@ -35,6 +45,22 @@ public class PlayerShooter : MonoBehaviour
         shootLine.enabled = false;
 
         shootMask = LayerMask.GetMask("Enemy");
+
+        ChangeWeapon();
+
+        //munitions[idweapon, 0 = qtd pentes, 1 = munição, 2 = qtdmaxmuniçãoporpente
+
+        munitions[0, 0] = 0;
+        munitions[0, 1] = 0;
+        munitions[0, 2] = 0;
+
+        munitions[1, 0] = 0;
+        munitions[1, 1] = 99;
+        munitions[1, 2] = 99;
+
+        munitions[2, 0] = 1;
+        munitions[2, 1] = 12;
+        munitions[2, 2] = 12;
     }
 
     private void Update()
@@ -48,7 +74,7 @@ public class PlayerShooter : MonoBehaviour
             StartCoroutine(EndKnifeAttack());
         }
 
-        if (Input.GetButton("Fire1") && timer >= timeBetweenBullets && idWeapon != 0)
+        if (Input.GetButton("Fire1") && timer >= timeBetweenBullets && idWeapon != 0 && CheckMunition())
         {
             Shoot();
         }
@@ -85,6 +111,37 @@ public class PlayerShooter : MonoBehaviour
             playerController.ChangeAnimationLayer(idWeapon);
         }
 
+        ChangeWeapon();
+    }
+
+    private void ChangeWeapon()
+    {
+        if (idWeapon == 0)
+        {
+            totalMunitions.enabled = false;
+            currentBullets.enabled = false;
+        }
+        else
+        {
+            totalMunitions.enabled = true;
+            currentBullets.enabled = true;
+        }
+
+
+        pictureWeapon.sprite = iconWeapon[idWeapon];
+        UpdateHud();
+    }
+
+    private void UpdateHud()
+    {
+        totalMunitions.text = munitions[idWeapon, 0].ToString();
+        currentBullets.text = munitions[idWeapon, 1].ToString();
+    }
+
+    private bool CheckMunition()
+    {
+        bool hasMunition = munitions[idWeapon, 1] > 0;
+        return hasMunition;
     }
 
     private void Shoot()
@@ -114,6 +171,16 @@ public class PlayerShooter : MonoBehaviour
         {
             shootLine.SetPosition(1, shootRay.origin + shootRay.direction * range);
         }
+
+        munitions[idWeapon, 1]--;
+
+        if (munitions[idWeapon, 1] == 0 && munitions[idWeapon, 0] > 0)
+        {
+            munitions[idWeapon,1] = munitions[idWeapon, 2];
+            munitions[idWeapon, 0]--; 
+        }
+
+        UpdateHud();
     }
 
     private void DisableEffect()
