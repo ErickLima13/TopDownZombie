@@ -9,7 +9,7 @@ public class PlayerShooter : MonoBehaviour
     private LineRenderer shootLine;
     private PlayerController playerController;
 
-    public float timeBetweenBullets = 0.3f;
+    [Range(0, 1)] public float[] timeBetweenBullets;
     public float range = 100f;
     public float displayEffect = 1f;
     public float delayKnifeAttack = 0.6f;
@@ -22,6 +22,7 @@ public class PlayerShooter : MonoBehaviour
 
     public bool isShoot;
     public bool isKnifeAttack;
+    private bool isReload;
 
     public int idWeapon;
     public Transform[] shootPos;
@@ -38,10 +39,13 @@ public class PlayerShooter : MonoBehaviour
 
     public int[,] munitions = new int[3, 3];
 
+    private AudioManager audioManager;
+
     private void Start()
     {
         playerController = GetComponent<PlayerController>();
         shootLine = GetComponent<LineRenderer>();
+        audioManager = playerController.GetAudioManager();
         shootLine.enabled = false;
 
         shootMask = LayerMask.GetMask("Enemy");
@@ -74,7 +78,7 @@ public class PlayerShooter : MonoBehaviour
             StartCoroutine(EndKnifeAttack());
         }
 
-        if (Input.GetButton("Fire1") && timer >= timeBetweenBullets && idWeapon != 0 && CheckMunition())
+        if (Input.GetButton("Fire1") && timer >= timeBetweenBullets[idWeapon] && idWeapon != 0  && !isReload)
         {
             Shoot();
         }
@@ -84,12 +88,12 @@ public class PlayerShooter : MonoBehaviour
             isShoot = false;
         }
 
-        if (timer >= timeBetweenBullets * displayEffect)
+        if (timer >= timeBetweenBullets[idWeapon] * displayEffect)
         {
             DisableEffect();
         }
 
-        if (Input.GetAxisRaw("Mouse ScrollWheel") > 0 && !isKnifeAttack)
+        if (Input.GetAxisRaw("Mouse ScrollWheel") > 0 && !isKnifeAttack && !isReload)
         {
             idWeapon++;
             if (idWeapon > weapons.Count - 1)
@@ -100,7 +104,7 @@ public class PlayerShooter : MonoBehaviour
             playerController.ChangeAnimationLayer(idWeapon);
         }
 
-        if (Input.GetAxisRaw("Mouse ScrollWheel") < 0 && !isKnifeAttack)
+        if (Input.GetAxisRaw("Mouse ScrollWheel") < 0 && !isKnifeAttack && !isReload)
         {
             idWeapon--;
             if (idWeapon < 0)
@@ -146,41 +150,44 @@ public class PlayerShooter : MonoBehaviour
 
     private void Shoot()
     {
-        playerController.TriggerShoot();
-
         timer = 0;
         isShoot = true;
-        shootLine.enabled = true;
-        shootLine.SetPosition(0, shootPos[idWeapon].position);
 
-        shootRay.origin = shootPos[idWeapon].position;
-        shootRay.direction = transform.forward;
-
-        Debug.DrawRay(shootRay.origin, shootRay.direction * range, Color.red, 1);
-
-        if (Physics.Raycast(shootRay, out shootHit, range, shootMask))
+        if (CheckMunition())
         {
-            print(shootHit.transform.name);
+            playerController.TriggerShoot();
+            shootLine.enabled = true;
+            shootLine.SetPosition(0, shootPos[idWeapon].position);
 
-            // comandos quando acertar um inimigo
-            shootLine.SetPosition(1, shootHit.point);
+            shootRay.origin = shootPos[idWeapon].position;
+            shootRay.direction = transform.forward;
 
-            shootHit.transform.gameObject.GetComponentInChildren<EnemyHp>().MakeHit(1);
+            Debug.DrawRay(shootRay.origin, shootRay.direction * range, Color.red, 1);
+
+            if (Physics.Raycast(shootRay, out shootHit, range, shootMask))
+            {
+                // comandos quando acertar um inimigo
+                shootLine.SetPosition(1, shootHit.point);
+
+                shootHit.transform.gameObject.GetComponentInChildren<EnemyHp>().MakeHit(1);
+            }
+            else
+            {
+                shootLine.SetPosition(1, shootRay.origin + shootRay.direction * range);
+            }
+
+            munitions[idWeapon, 1]--;
+
+            if (munitions[idWeapon, 1] <= 0 && munitions[idWeapon, 0] > 0)
+            {
+                StartCoroutine(Reload());
+            }
         }
         else
         {
-            shootLine.SetPosition(1, shootRay.origin + shootRay.direction * range);
+            audioManager.PlaySfx(audioManager.noAmmo);
         }
 
-        munitions[idWeapon, 1]--;
-
-        if (munitions[idWeapon, 1] == 0 && munitions[idWeapon, 0] > 0)
-        {
-            munitions[idWeapon,1] = munitions[idWeapon, 2];
-            munitions[idWeapon, 0]--; 
-        }
-
-        UpdateHud();
     }
 
     private void DisableEffect()
@@ -197,5 +204,16 @@ public class PlayerShooter : MonoBehaviour
         yield return new WaitForSeconds(delayKnifeAttack);
 
         isKnifeAttack = false;
+    }
+
+    private IEnumerator Reload()
+    {
+        isReload = true;
+        audioManager.PlaySfx(audioManager.reloads[idWeapon]);
+        yield return new WaitForSeconds(audioManager.reloads[idWeapon].length);
+        munitions[idWeapon, 1] = munitions[idWeapon, 2];
+        munitions[idWeapon, 0]--;
+        isReload = false;
+        UpdateHud();
     }
 }

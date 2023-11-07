@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody playerRb;
     private PlayerShooter shooter;
     private Animator animator;
+    private AudioManager audioManager;
 
     [Range(0,5)] public float movementSpeed;
 
@@ -17,9 +18,11 @@ public class PlayerController : MonoBehaviour
     private float camRayLength = 100f;
 
     private bool isWalk;
+    private bool isStep;
 
     private void Start()
     {
+        audioManager = FindObjectOfType<AudioManager>();
         playerRb = GetComponent<Rigidbody>();
         shooter = GetComponent<PlayerShooter>();
         animator = GetComponentInChildren<Animator>();
@@ -73,14 +76,29 @@ public class PlayerController : MonoBehaviour
             movement.Set(0f, 0f, 0f);
         }
 
+        if (isWalk && !isStep)
+        {
+            StartCoroutine(StepFx());
+        }
+
         movement = movement.normalized * movementSpeed * Time.deltaTime;
         playerRb.MovePosition(transform.position + movement);
         animator.SetBool("isWalk", isWalk);
     }
 
+    private IEnumerator StepFx()
+    {
+        isStep = true;
+        int idStep = Random.Range(0,audioManager.steps.Length);
+        audioManager.PlaySfx(audioManager.steps[idStep]);
+        yield return  new WaitForSeconds(audioManager.steps[idStep].length);
+        isStep = false;
+    }
+
     public void TriggerShoot()
     {
         animator.SetTrigger("attack");
+        audioManager.PlaySfx(audioManager.fires[shooter.idWeapon]);
     }
 
     public void ChangeAnimationLayer(int idLayer)
@@ -91,5 +109,10 @@ public class PlayerController : MonoBehaviour
         }
 
         animator.SetLayerWeight(idLayer, 1);
+    }
+
+    public AudioManager GetAudioManager()
+    {
+        return audioManager; 
     }
 }

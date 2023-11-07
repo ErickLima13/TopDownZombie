@@ -23,6 +23,8 @@ public class EnemyHp : MonoBehaviour
 
     public void MakeHit(int dmg)
     {
+       
+
         currentHp -= dmg;
 
         float perc = currentHp / (float)maxHp;
