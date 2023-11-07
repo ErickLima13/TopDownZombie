@@ -19,7 +19,7 @@ public class EnemyMovement : MonoBehaviour
     private bool canAttack;
     private bool isDead;
 
-    public LayerMask playerMask;
+    private LayerMask playerMask;
 
     [Range(1, 100)] public float walkRadius;
 
@@ -37,8 +37,11 @@ public class EnemyMovement : MonoBehaviour
 
     private void Update()
     {
-        Patrol();
-        FindPlayer();
+        if (!isDead)
+        {
+            Patrol();
+            FindPlayer();
+        }
     }
 
     private void CheckDistanceToPlayer()
@@ -106,6 +109,27 @@ public class EnemyMovement : MonoBehaviour
         {
             agent.SetDestination(view[0].transform.position);
             CheckDistanceToPlayer();
+        }
+    }
+
+    private void LimitMove()
+    {
+        if (transform.position.x >= 20)
+        {
+            transform.position = new(20, transform.position.y, transform.position.z);
+        }
+        else if (transform.position.x <= -20)
+        {
+            transform.position = new(-20, transform.position.y, transform.position.z);
+        }
+
+        if (transform.position.z >= 20)
+        {
+            transform.position = new(transform.position.x, transform.position.y, 20);
+        }
+        else if (transform.position.z <= -20)
+        {
+            transform.position = new(transform.position.x, transform.position.y, -20);
         }
     }
 

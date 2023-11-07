@@ -32,7 +32,7 @@ public class PlayerHp : MonoBehaviour
 
         if (currentHp <= 0)
         {
-            
+            // game over
         }
     }
 }

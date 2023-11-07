@@ -45,7 +45,7 @@ public class PlayerShooter : MonoBehaviour
     {
         playerController = GetComponent<PlayerController>();
         shootLine = GetComponent<LineRenderer>();
-        audioManager = playerController.GetAudioManager();
+        audioManager = AudioManager.Instance;
         shootLine.enabled = false;
 
         shootMask = LayerMask.GetMask("Enemy");

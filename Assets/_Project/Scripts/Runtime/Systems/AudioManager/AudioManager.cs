@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
@@ -11,6 +12,25 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] fires;
     public AudioClip[] reloads;
     public AudioClip noAmmo;
+
+    public static AudioManager Instance
+    {
+        get; private set;
+    }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
+
+        DontDestroyOnLoad(gameObject);
+    }
 
     public void PlaySfx(AudioClip clip)
     {
