@@ -1,8 +1,10 @@
+using GamePlay;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEditor.PlayerSettings;
 
-public class EnemyMovement : MonoBehaviour
+public class EnemyMovement : MonoBehaviour,IHear
 {
     private NavMeshAgent agent;
     private Animator animator;
@@ -133,12 +135,16 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
+    //private void OnDrawGizmosSelected()
+    //{
+    //    Gizmos.DrawWireSphere(transform.position, distanceToView);
+    //    Gizmos.DrawWireSphere(transform.position, distanceToAttack);
+    //    Gizmos.DrawWireSphere(transform.position, walkRadius);
+    //}
+
+    public void RespondToSound(Sound sound)
     {
-        Gizmos.DrawWireSphere(transform.position, distanceToView);
-        Gizmos.DrawWireSphere(transform.position, distanceToAttack);
-        Gizmos.DrawWireSphere(transform.position, walkRadius);
+        agent.SetDestination(sound.pos);
+        agent.isStopped = false;
     }
-
-
 }

@@ -13,6 +13,9 @@ public class UIManager : MonoBehaviour
 
     [Header("Player")]
     [SerializeField] private Image _hpBarPlayer;
+    [SerializeField] private Image _panelPlayer;
+    [SerializeField] private float _damage;
+
 
     private void Start()
     {
@@ -35,6 +38,10 @@ public class UIManager : MonoBehaviour
     {
         _hpBarPlayer.fillAmount = hp;
         _hpBarPlayer.color = _gradient.Evaluate(hp);
+        var tempColor = _panelPlayer.color;
+        tempColor.a = _damage;
+        _panelPlayer.color = tempColor;
+        _damage += 0.1f;
     }
 
     private IEnumerator DisablePanel()

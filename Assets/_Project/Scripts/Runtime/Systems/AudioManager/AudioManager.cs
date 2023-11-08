@@ -1,7 +1,10 @@
+using GamePlay;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static GamePlay.Sound;
+using static Unity.VisualScripting.Member;
 
 public class AudioManager : MonoBehaviour
 {
@@ -12,6 +15,10 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] fires;
     public AudioClip[] reloads;
     public AudioClip noAmmo;
+
+    [SerializeField] private float soundRange = 25f;
+
+    [SerializeField] private Sound.SoundType soundType = Sound.SoundType.Dangerous;
 
     public static AudioManager Instance
     {

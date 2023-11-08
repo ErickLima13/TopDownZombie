@@ -1,3 +1,4 @@
+using GamePlay;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -10,7 +11,7 @@ public class PlayerShooter : MonoBehaviour
     private PlayerController playerController;
 
     [Range(0, 1)] public float[] timeBetweenBullets;
-    public float range = 100f;
+    public float[] range;
     public float displayEffect = 1f;
     public float delayKnifeAttack = 0.6f;
 
@@ -31,6 +32,8 @@ public class PlayerShooter : MonoBehaviour
     public Transform hitBoxKnifePos;
     public GameObject hitBoxKnifePrefab;
 
+    public Transform aimPos;
+
     public Sprite[] iconWeapon;
     public Image pictureWeapon;
 
@@ -40,12 +43,15 @@ public class PlayerShooter : MonoBehaviour
     public int[,] munitions = new int[3, 3];
 
     private AudioManager audioManager;
+    private SoundMaker soundMaker;
 
     private void Start()
     {
+
         playerController = GetComponent<PlayerController>();
         shootLine = GetComponent<LineRenderer>();
         audioManager = AudioManager.Instance;
+        soundMaker = GetComponent<SoundMaker>();
         shootLine.enabled = false;
 
         shootMask = LayerMask.GetMask("Enemy");
@@ -69,6 +75,7 @@ public class PlayerShooter : MonoBehaviour
 
     private void Update()
     {
+        aimPos.position = shootPos[idWeapon].position + transform.forward * range[idWeapon];
         timer += Time.deltaTime;
 
         if (Input.GetButton("Fire1") && idWeapon == 0 && !isKnifeAttack)
@@ -155,6 +162,7 @@ public class PlayerShooter : MonoBehaviour
 
         if (CheckMunition())
         {
+            soundMaker.MakeASound();
             playerController.TriggerShoot();
             shootLine.enabled = true;
             shootLine.SetPosition(0, shootPos[idWeapon].position);
@@ -162,9 +170,9 @@ public class PlayerShooter : MonoBehaviour
             shootRay.origin = shootPos[idWeapon].position;
             shootRay.direction = transform.forward;
 
-            Debug.DrawRay(shootRay.origin, shootRay.direction * range, Color.red, 1);
+            Debug.DrawRay(shootRay.origin, shootRay.direction * range[idWeapon], Color.red, 1);
 
-            if (Physics.Raycast(shootRay, out shootHit, range, shootMask))
+            if (Physics.Raycast(shootRay, out shootHit, range[idWeapon], shootMask))
             {
                 // comandos quando acertar um inimigo
                 shootLine.SetPosition(1, shootHit.point);
@@ -173,7 +181,7 @@ public class PlayerShooter : MonoBehaviour
             }
             else
             {
-                shootLine.SetPosition(1, shootRay.origin + shootRay.direction * range);
+                shootLine.SetPosition(1, shootRay.origin + shootRay.direction * range[idWeapon]);
             }
 
             munitions[idWeapon, 1]--;
