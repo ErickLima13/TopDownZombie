@@ -50,6 +50,7 @@ public class EnemyHp : MonoBehaviour
 
     private IEnumerator Dissapear()
     {
+        spriteRenderer.sortingOrder--;
         Instantiate(decalPrefab,transform.position,decalPrefab.transform.localRotation);
 
         yield return new WaitForSeconds(3);
@@ -59,5 +60,10 @@ public class EnemyHp : MonoBehaviour
             spriteRenderer.enabled = !spriteRenderer.enabled;
             yield return new WaitForSeconds(0.02f);
         }
+
+        Destroy(decalPrefab);
+        Destroy(gameObject); 
+        
+        
     }
 }
